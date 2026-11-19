@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "oxlint",
     "preview": "vite preview",
-    "deploy:check": "npm run lint && npm run build"
+    "lint": "oxlint src tools",
+    "check:models": "node tools/check-models.mjs",
+    "check": "npm run lint && npm run check:models && npm run build"
   },
   "dependencies": {
     "@fontsource/mukta": "^5.3.0",

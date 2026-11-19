@@ -11,11 +11,32 @@ A field ledger for Indian farms, at **https://awsmankit.github.io/khet-khata/**.
 
 ```sh
 npm install
-npm run dev       # http://localhost:5173/khet-khata/
-npm run lint
-npm run build     # output in dist/
-npm run preview   # serve the build; the service worker runs here
+npm run dev            # http://localhost:5173/khet-khata/
+npm run check          # lint, check all 3D models, build
+npm run check:models   # build every crop model in Node and report problems
+npm run preview        # serve the build; the service worker runs here
 ```
+
+## Project layout
+
+```
+src/
+  main.jsx                 entry: mounts the app, registers the service worker
+  app/                     app shell: top bar, tab bar, screen switching, global styles
+  lib/storage.js           on-device storage and backup files
+  features/
+    land/                  plots, ponds, land types, KML import, map, GPS boundary walk
+    farm/                  farm profile, crop register, backups panel, demo farm
+    crops/                 crop guide and crop data (data/coreCrops.js, data/moreCrops.js)
+    field3d/               the live 3D field
+      CropStage.jsx        controls around the 3D view
+      engine/              renderer, sky, ground, wind, shared plant-building kit
+      models/              one file per crop group, helpers in a folder of the same name
+tools/                     check-models.mjs and contact-sheet.html for reviewing 3D models
+docs/3d-models.md          how crop models are built and reviewed
+```
+
+Naming: React components are `PascalCase.jsx` with their stylesheet beside them; other modules are `camelCase.js`; folders are lowercase.
 
 Set `BASE_PATH=/` when building for a host that serves the site from the domain root.
 

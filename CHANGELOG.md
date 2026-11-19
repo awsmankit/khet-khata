@@ -24,6 +24,8 @@ All notable changes to Khet Khata are listed here. Versions follow [Semantic Ver
 
 ### Changed
 - The original eight crops were made lighter so phones stay smooth.
+- Screen links renamed: `#records` is now `#plots` and `#register` is now `#profile`. Old links still work.
+- Code reorganised by feature (`app`, `features/land`, `features/farm`, `features/crops`, `features/field3d`, `lib`), with consistent file naming, and unused code removed. See the README's project layout.
 
 
 

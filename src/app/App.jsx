@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { BookOpen, FileUp, List, Map, NotebookPen, Plus, Search, Sprout, Upload, UserRound } from 'lucide-react'
 import { downloadBackup, KEYS, readBackupFile, readLocal, writeAll, writeLocal } from '../lib/storage.js'
-import { everyCrop } from '../fields/cropIndex.js'
+import { everyCrop } from '../features/crops/cropIndex.js'
 import CropGuide from '../features/crops/CropGuide.jsx'
 import AddPlot from '../features/land/AddPlot.jsx'
 import BoundaryWalk from '../features/land/BoundaryWalk.jsx'
@@ -19,7 +19,7 @@ import { demoCropRecords } from '../features/farm/demoData.js'
 import FarmProfileForm from '../features/farm/FarmProfileForm.jsx'
 import './App.css'
 
-const CropStage = lazy(() => import('../fields/CropStage.jsx'))
+const CropStage = lazy(() => import('../features/field3d/CropStage.jsx'))
 
 const views = [
   { id: 'fields', label: 'Fields', short: 'Fields', icon: Sprout },

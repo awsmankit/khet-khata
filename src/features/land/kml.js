@@ -16,7 +16,7 @@ function slug(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'plot'
 }
 
-export function parseKml(source, fileName) {
+function parseKml(source, fileName) {
   const documentNode = new DOMParser().parseFromString(source, 'application/xml')
   if (documentNode.getElementsByTagName('parsererror').length) throw new Error(`${fileName} is not a readable KML file.`)
   const placemarks = [...documentNode.getElementsByTagName('Placemark')]

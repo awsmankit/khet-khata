@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><title>Khet Khata model contact sheet</title>
+<style>body{margin:0;background:#111;color:#eee;font:13px system-ui}#host{position:fixed;left:-9999px;top:0;width:480px;height:300px}#status{padding:6px 10px}canvas#sheet{display:block}</style></head>
+<body><div id="status">Rendering…</div><canvas id="sheet"></canvas><div id="host"></div>
+<script type="module">
+// Dev-only QA page: renders each crop at its showcase growth into one grid image.
+// /khet-khata/tools/contact-sheet.html?group=fruitTrees&g=0.8&light=afternoon&cols=4
+import { FieldEngine } from '../src/features/field3d/engine/FieldEngine.js'
+import { everyCrop } from '../src/features/crops/cropIndex.js'
+const params = new URLSearchParams(location.search)
+const group = params.get('group')
+const ids = params.get('ids')?.split(',')
+const crops = everyCrop.filter((crop) => (ids ? ids.includes(crop.id) : !group || crop.group === group))
+const cols = Number(params.get('cols') || 4)
+const W = 480, H = 300, LABEL = 22
+const sheet = document.getElementById('sheet')
+sheet.width = cols * W
+sheet.height = Math.ceil(crops.length / cols) * (H + LABEL)
+const ctx = sheet.getContext('2d')
+const engine = new FieldEngine(document.getElementById('host'), { quality: Number(params.get('q') || 1), reducedMotion: true })
+engine.setWind(0.4)
+engine.setLight(params.get('light') || 'afternoon')
+const status = document.getElementById('status')
+const failures = []
+for (let index = 0; index < crops.length; index += 1) {
+  const crop = crops[index]
+  status.textContent = `Rendering ${index + 1}/${crops.length}: ${crop.id}`
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  const x = (index % cols) * W
+  const y = Math.floor(index / cols) * (H + LABEL)
+  let ok = false
+  try {
+    ok = engine.setCrop(crop.id, { animateCamera: false })
+    const info = engine.modelInfo(crop.id)
+    if (ok) engine.setGrowth(params.get('g') ? Number(params.get('g')) : info.showcase)
+    engine.renderer.render(engine.scene, engine.camera)
+    if (ok) ctx.drawImage(engine.renderer.domElement, x, y + LABEL, W, H)
+  } catch (error) { failures.push(`${crop.id}: ${error.message}`); console.error(crop.id, error) }
+  ctx.fillStyle = ok ? '#1d3a28' : '#6b1a1a'
+  ctx.fillRect(x, y, W, LABEL)
+  ctx.fillStyle = '#fff'
+  ctx.font = '600 14px system-ui'
+  ctx.fillText(`${crop.id}${ok ? '' : ' (no model)'}`, x + 8, y + 16)
+}
+status.textContent = `Done: ${crops.length} crops${failures.length ? `, errors: ${failures.join(' | ')}` : ''}`
+document.body.dataset.done = 'true'
+</script></body></html>

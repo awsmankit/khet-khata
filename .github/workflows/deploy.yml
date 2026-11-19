@@ -25,6 +25,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      - run: npm run check:models
       - run: npm run build
       - name: Check that no bundled KML plot data is in the build
         run: |

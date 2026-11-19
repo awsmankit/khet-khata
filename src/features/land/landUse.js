@@ -10,7 +10,7 @@ export const landUses = [
   { id: 'other', label: 'Other', local: 'अन्य', localLatin: 'anya', color: '#5a5a5a', fill: '#b5b5b5' },
 ]
 
-export const unsetLandUse = { id: '', label: 'Not set yet', local: '', localLatin: '', color: '#6b6b6b', fill: '#cfcfcf', dashed: true }
+const unsetLandUse = { id: '', label: 'Not set yet', local: '', localLatin: '', color: '#6b6b6b', fill: '#cfcfcf', dashed: true }
 
 export const pondWater = [
   { id: 'year-round', label: 'Water all year' },

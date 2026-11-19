@@ -42,10 +42,6 @@ export function writeLocal(key, value) {
   return true
 }
 
-export function readAll() {
-  return Object.fromEntries(Object.entries(KEYS).map(([name, key]) => [name, readLocal(key, fallbacks[name])]))
-}
-
 export function writeAll(data) {
   Object.entries(KEYS).forEach(([name, key]) => writeLocal(key, data[name] ?? fallbacks[name]))
 }

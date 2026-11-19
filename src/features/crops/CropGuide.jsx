@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Search, Sprout } from 'lucide-react'
-import { categories, everyCrop, regions, regionsOf, seasons } from '../../fields/cropIndex.js'
+import { categories, everyCrop, regions, regionsOf, seasons } from './cropIndex.js'
 import './CropGuide.css'
 
 function Chips({ label, options, value, onChange }) {

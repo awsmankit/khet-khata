@@ -1,5 +1,5 @@
 import { Plus, Sprout, Trash2 } from 'lucide-react'
-import { everyCrop } from '../../fields/cropIndex.js'
+import { everyCrop } from '../crops/cropIndex.js'
 import './farm.css'
 
 // Names offered while typing a crop: every crop in the guide plus a few common extras.
