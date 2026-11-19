@@ -2,6 +2,11 @@
 
 All notable changes to Khet Khata are listed here. Versions follow [Semantic Versioning](https://semver.org/): a new major number means saved data or behaviour changes in a way that needs attention, a minor number adds features, and a patch number fixes problems.
 
+## [1.1.1] - 2026-11-19
+
+### Fixed
+- In the plot list, the delete button stretched across each row and covered the plot name. It now sits at the right edge.
+
 ## [1.1.0] - 2026-11-19
 
 ### Added
