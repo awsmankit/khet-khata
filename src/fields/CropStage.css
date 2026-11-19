@@ -10,6 +10,8 @@
 
 .stage-heading{position:absolute;left:clamp(18px,4vw,56px);top:clamp(14px,3.2vh,36px);max-width:min(620px,70%);pointer-events:none;color:var(--ink)}
 .stage-local{display:block;padding-bottom:.12em;font:400 clamp(84px,11.5vw,184px)/1.02 'Yatra One',serif;letter-spacing:-.01em;color:var(--ink);opacity:.9;transform-origin:left bottom;animation:local-in .9s cubic-bezier(.2,.8,.2,1) both}
+.stage-local.is-long{font-size:clamp(64px,8.5vw,140px)}
+.stage-local.is-longer{font-size:clamp(52px,6.5vw,108px)}
 .stage-name{margin:.06em 0 0;font:400 clamp(26px,2.6vw,38px)/1.05 'Yatra One',serif;color:var(--ink)}
 .stage-name span{margin-left:.35em;font:500 .5em/1 Mukta,sans-serif;color:var(--ink-soft)}
 .stage-season{margin:.5rem 0 0;font:500 15px/1.4 Mukta,sans-serif;color:var(--ink-soft)}
@@ -47,16 +49,27 @@
 .season-ticks li:first-child{transform:none}.season-ticks li:first-child:before{left:0}
 .season-ticks li:last-child:not(:first-child){transform:translateX(-80%)}
 
-.shelf{grid-area:shelf;display:flex;align-items:flex-start;align-self:start;gap:26px;min-width:0}
-.shelf-group{display:grid;align-content:start;gap:6px;min-width:0}
-.shelf-label{font:500 13px/1 Mukta,sans-serif;color:rgba(255,255,255,.62)}
-.shelf-items{display:flex;gap:4px}
-.crop-chip{display:grid;justify-items:start;gap:0;min-width:74px;padding:7px 12px 6px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#fff;text-align:left;cursor:pointer;transition:background .15s ease,border-color .15s ease}
-.crop-chip span{font:400 22px/1.15 'Yatra One',serif}
-.crop-chip small{font:500 12px/1.2 Mukta,sans-serif;color:rgba(255,255,255,.7)}
+.shelf{grid-area:shelf;display:grid;gap:8px;align-self:start;min-width:0}
+.shelf-top{display:flex;align-items:center;gap:12px;min-width:0}
+.shelf-tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.shelf-tabs::-webkit-scrollbar{display:none}
+.shelf-tabs button{flex:none;min-height:34px;padding:0 10px;border:0;border-bottom:2px solid transparent;background:none;color:rgba(255,255,255,.66);font:500 14px/1 Mukta,sans-serif;white-space:nowrap}
+.shelf-tabs button:hover{color:#fff}
+.shelf-tabs button.is-active{color:#fff;border-bottom-color:var(--haldi)}
+.shelf-search{flex:none;display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.7)}
+.shelf-search input{width:120px;border:0;outline:0;background:none;color:#fff;font:400 15px/1 Mukta,sans-serif}
+.shelf-search input::placeholder{color:rgba(255,255,255,.5)}
+.shelf-search button{display:grid;place-items:center;padding:0;border:0;background:none;color:inherit}
+.shelf-items{display:flex;gap:4px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent;padding-bottom:4px}
+.shelf-empty{margin:0;padding:10px 0;color:rgba(255,255,255,.7);font-size:14px}
+.shelf-guide{justify-self:start;color:var(--haldi-soft)!important;font:500 14px/1.4 Mukta,sans-serif!important}
+.crop-chip{flex:none;display:grid;justify-items:start;gap:0;min-width:74px;padding:7px 12px 6px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#fff;text-align:left;cursor:pointer;scroll-snap-align:start;transition:background .15s ease,border-color .15s ease}
+.crop-chip span{font:400 21px/1.15 'Yatra One',serif;white-space:nowrap}
+.crop-chip small{font:500 12px/1.2 Mukta,sans-serif;color:rgba(255,255,255,.7);white-space:nowrap}
 .crop-chip:hover{border-color:rgba(255,255,255,.5)}
 .crop-chip.is-active{background:var(--haldi);border-color:var(--haldi);color:var(--ink)}
 .crop-chip.is-active small{color:var(--ink)}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 .stage-tools{grid-area:tools;display:flex;align-items:center;justify-content:flex-end;gap:22px;flex-wrap:wrap}
 .wind-tool{display:grid;gap:4px;min-width:170px;font:500 13px/1 Mukta,sans-serif;color:rgba(255,255,255,.8)}
@@ -89,10 +102,15 @@
   .stage-readout strong{font-size:17px}
   .stage-hint{bottom:auto;top:auto;left:12px;transform:none;bottom:12px;white-space:normal;max-width:48%;font-size:12px;border-radius:8px}
   .stage-controls{gap:14px;padding:14px 14px 18px}
-  .shelf{flex-direction:column;gap:12px;margin:0 -14px;padding:0 14px}
-  .shelf-items{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}
+  .shelf{margin:0 -14px;padding:0 14px}
+  .shelf-top{flex-direction:column;align-items:stretch;gap:6px}
+  .shelf-search input{width:100%;font-size:16px}
+  .shelf-search{height:40px}
+  .shelf-items{scrollbar-width:none}
   .shelf-items::-webkit-scrollbar{display:none}
-  .crop-chip{flex:none;min-width:78px;min-height:52px;scroll-snap-align:start}
+  .crop-chip{min-width:78px;min-height:52px}
+  .stage-local.is-long{font-size:clamp(48px,15vw,84px)}
+  .stage-local.is-longer{font-size:clamp(40px,11vw,64px)}
   .stage-tools{display:grid;grid-template-columns:1fr;gap:14px}
   .light-tool{display:grid;grid-template-columns:repeat(4,1fr)}
   .light-tool button{min-height:44px;padding:0 4px}

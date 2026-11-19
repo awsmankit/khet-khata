@@ -2,7 +2,30 @@
 
 All notable changes to Khet Khata are listed here. Versions follow [Semantic Versioning](https://semver.org/): a new major number means saved data or behaviour changes in a way that needs attention, a minor number adds features, and a patch number fixes problems.
 
-## [1.0.1] - 2026-11-19
+## [1.1.0] - 2026-11-19
+
+### Added
+- **161 crops from every part of India** in the 3D field, each with its Hindi name, season, main growing states and a season timeline:
+  - Cereals and millets: barley, oats, jowar, bajra, ragi, foxtail, kodo, kutki, sanwa, cheena, buckwheat, rajgira, black rice, quinoa.
+  - Pulses: chana, arhar, masoor, moong, urad, matar, rajma, lobia, kulthi, moth, khesari, guar.
+  - Oilseeds: groundnut, soybean, sunflower, til, alsi, castor, safflower, niger.
+  - Fibre and cash: cotton, jute, mesta, sunn hemp, tobacco.
+  - Fodder: berseem, lucerne, napier.
+  - Vegetables, including polyhouse capsicum and cherry tomato, and a mushroom shed.
+  - Gourds on bamboo machans, melons on riverbank sand.
+  - Flowers, from marigold and rose to an orchid net house.
+  - Fruit trees, from guava and apple to jackfruit, cashew, grapes on a pandal, kiwi and dragon fruit.
+  - Plantations: tea on a hill slope, coffee under shade, rubber, coconut, arecanut, oil palm, date palm, cocoa, black pepper, cardamom, the betel barej.
+  - Spices: turmeric, ginger, cumin, coriander, fennel, ajwain, saffron.
+  - Medicinal herbs.
+  - Pond crops: makhana, singhara, lotus and a fish pond with an aerator.
+- **Crop guide**: browse every crop by group, region (North, East, North-east, West, Central, South, Hills) and season, and open any one in 3D with "See it grow".
+- **Crop shelf** in the 3D field with crop groups and search; the crop register suggests all crops.
+
+### Changed
+- The original eight crops were made lighter so phones stay smooth.
+
+
 
 ### Fixed
 - The publish check that guards against bundled plot data no longer mistakes the backup file name for private data, so the site deploys.

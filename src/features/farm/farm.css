@@ -1,0 +1,28 @@
+/* Farm: crop register, demo farm, backups */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+/* crop register */
+.crop-list{list-style:none;margin:0;padding:0}
+.crop-list li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 22px;border-bottom:1px solid var(--rule)}
+.crop-list li:last-child{border-bottom:0}
+.crop-list strong{display:block;font:400 20px/1.2 'Yatra One',serif}
+.crop-list span{display:block;color:var(--ink-soft);font-size:15px}
+.crop-list small{display:block;margin-top:4px;font-size:14px}
+/* demo */
+.demo-sheet{padding-bottom:20px}
+.demo-sheet>.plot-facts,.demo-sheet>.demo-grid,.demo-sheet>.quiet-note{margin-left:22px;margin-right:22px}
+.demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px;border-top:1px solid var(--rule)}
+.demo-grid>*{padding:10px 0;border-bottom:1px solid var(--rule)}
+.demo-grid b{font-weight:600;color:var(--ink-soft);font-size:14px}
+.stack{display:grid;gap:20px}
+.data-body{padding:16px 22px 22px}
+.data-status{display:flex;gap:10px;align-items:flex-start;margin:0;font-size:15px}
+.data-status svg{flex:none;margin-top:2px;color:var(--patta)}
+.data-counts{margin:10px 0 0;font-weight:600}
+.data-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.data-panel .import-message{margin:12px 0 0;color:var(--patta);font-weight:600}
+@media (max-width:860px){
+  .split{grid-template-columns:1fr}
+  .crop-list li{padding:14px 16px}
+  .data-body{padding:14px 16px 18px}
+  .data-actions .button{flex:1 1 140px;white-space:normal;text-align:center;line-height:1.2;padding:8px 12px}
+}

@@ -1,11 +1,11 @@
 import * as THREE from 'three'
 import { applyWind, blade, ellipsoid, GrowingPart, item, lerp, merge, orient, plantMaterial, prep, smooth, transform, tube, windDepthMaterial } from './geometry.js'
 
-const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z)
-const UP = V(0, 1, 0)
+export const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z)
+export const UP = V(0, 1, 0)
 const tmpB = new THREE.Color()
 
-function ramp(target, g, stops) {
+export function ramp(target, g, stops) {
   if (g <= stops[0][0]) return target.set(stops[0][1])
   for (let index = 1; index < stops.length; index += 1) {
     if (g <= stops[index][0]) {
@@ -16,12 +16,12 @@ function ramp(target, g, stops) {
   return target.set(stops[stops.length - 1][1])
 }
 
-const tone = (target, item) => target.multiplyScalar(1 + item.tone)
+export const tone = (target, item) => target.multiplyScalar(1 + item.tone)
 
 // Grey-scale shading: vertex colours carry light and dark, instance colours carry the hue.
-const shade = (low, high) => (color, x, y) => color.setScalar(lerp(low, high, Math.min(1, Math.max(0, y))))
+export const shade = (low, high) => (color, x, y) => color.setScalar(lerp(low, high, Math.min(1, Math.max(0, y))))
 
-function rowSpots({ width, depth, rowGap, plantGap, random, jitter = 0.25, skip = 0.02 }) {
+export function rowSpots({ width, depth, rowGap, plantGap, random, jitter = 0.25, skip = 0.02 }) {
   const spots = []
   const rowCount = Math.floor(width / rowGap)
   for (let row = 0; row < rowCount; row += 1) {
@@ -34,7 +34,7 @@ function rowSpots({ width, depth, rowGap, plantGap, random, jitter = 0.25, skip 
   return spots
 }
 
-function windMaterials(ctx, options, materialOptions = {}) {
+export function windMaterials(ctx, options, materialOptions = {}) {
   const material = applyWind(plantMaterial(materialOptions), ctx.wind, options)
   const depth = windDepthMaterial(ctx.wind, options)
   ctx.disposables.push(material, depth)
@@ -42,7 +42,7 @@ function windMaterials(ctx, options, materialOptions = {}) {
 }
 
 // Places plant variants on spots and wires up any attached parts (ears, cobs, flowers).
-function assembleField(ctx, { variants, spots, baseY = 0, plant, attachments = [], wind, materialOptions }) {
+export function assembleField(ctx, { variants, spots, baseY = 0, plant, attachments = [], wind, materialOptions }) {
   const { random } = ctx
   const plantMats = windMaterials(ctx, wind, materialOptions)
   const attachMats = attachments.map((attachment) => windMaterials(ctx, wind, attachment.materialOptions || materialOptions))
@@ -65,7 +65,7 @@ function assembleField(ctx, { variants, spots, baseY = 0, plant, attachments = [
 }
 
 /* ---------------------------------------------------------------- wheat */
-function wheatEar(random, length = 0.085) {
+export function wheatEar(random, length = 0.085) {
   const parts = []
   const spikelets = 9
   for (let index = 0; index < spikelets; index += 1) {
@@ -85,7 +85,7 @@ function wheatEar(random, length = 0.085) {
 function wheatVariant(random) {
   const plant = []
   const ears = []
-  const tillers = 4 + (random() < 0.45 ? 1 : 0)
+  const tillers = 3 + (random() < 0.5 ? 1 : 0)
   const pivot = V()
   for (let index = 0; index < tillers; index += 1) {
     const azimuth = random() * Math.PI * 2
@@ -110,7 +110,7 @@ function wheatVariant(random) {
 
 function buildWheat(ctx) {
   const { random, quality } = ctx
-  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.24, plantGap: 0.24 / Math.sqrt(quality), random })
+  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.26, plantGap: 0.28 / Math.sqrt(quality), random })
   const variants = [0, 1, 2].map(() => wheatVariant(random))
   assembleField(ctx, {
     variants,
@@ -173,7 +173,7 @@ function paddyVariant(random) {
 
 function buildPaddy(ctx) {
   const { random, quality } = ctx
-  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.42, plantGap: 0.36 / Math.sqrt(quality), random, jitter: 0.12, skip: 0.01 })
+  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.44, plantGap: 0.42 / Math.sqrt(quality), random, jitter: 0.12, skip: 0.01 })
   const variants = [0, 1, 2].map(() => paddyVariant(random))
   assembleField(ctx, {
     variants,
@@ -280,7 +280,7 @@ function mustardVariant(random) {
     plant.push(tube([start, start.clone().lerp(end, 0.5).add(V(0, 0.04, 0)), end], 0.0035, 0.002, { radial: 3, tubular: 3, colorFn: shade(0.8, 1) }))
     const direction = end.clone().sub(start).normalize()
     // flower dome at the tip
-    for (let flower = 0; flower < 18; flower += 1) {
+    for (let flower = 0; flower < 14; flower += 1) {
       const a = random() * Math.PI * 2
       const r = Math.sqrt(random()) * 0.062
       const p = end.clone().add(V(Math.cos(a) * r, 0.01 + (0.062 - r) * 0.7 + random() * 0.015, Math.sin(a) * r))
@@ -311,7 +311,7 @@ function mustardVariant(random) {
 
 function buildMustard(ctx) {
   const { random, quality } = ctx
-  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.4, plantGap: 0.32 / Math.sqrt(quality), random, jitter: 0.3 })
+  const spots = rowSpots({ width: 12, depth: 16, rowGap: 0.42, plantGap: 0.36 / Math.sqrt(quality), random, jitter: 0.3 })
   const variants = [0, 1, 2].map(() => mustardVariant(random))
   assembleField(ctx, {
     variants,
@@ -463,11 +463,11 @@ function buildBanana(ctx) {
 }
 
 /* ---------------------------------------------------------------- orchard trees */
-function shellPoint(center, rx, ry, azimuth, elevation, scale = 1) {
+export function shellPoint(center, rx, ry, azimuth, elevation, scale = 1) {
   return V(center.x + Math.cos(elevation) * Math.cos(azimuth) * rx * scale, center.y + Math.sin(elevation) * ry * scale, center.z + Math.cos(elevation) * Math.sin(azimuth) * rx * scale)
 }
 
-function treeSkeleton(random, { origin, trunkHeight, trunkRadius, center, rx, ry, limbs = 4, barkColor = '#5a4636' }) {
+export function treeSkeleton(random, { origin, trunkHeight, trunkRadius, center, rx, ry, limbs = 4, barkColor = '#5a4636' }) {
   const branches = []
   const tips = []
   const bark = (c, x, y, z) => c.set(barkColor).multiplyScalar(0.8 + 0.35 * (Math.sin(x * 37 + y * 11) * Math.sin(z * 29 - y * 7) * 0.5 + 0.5))
@@ -494,7 +494,7 @@ function treeSkeleton(random, { origin, trunkHeight, trunkRadius, center, rx, ry
   return { branches, tips }
 }
 
-function canopyCore(random, center, rx, ry, color) {
+export function canopyCore(random, center, rx, ry, color) {
   const geometry = new THREE.SphereGeometry(1, 20, 14)
   const position = geometry.attributes.position
   const vertex = V()
@@ -507,7 +507,7 @@ function canopyCore(random, center, rx, ry, color) {
   return prep(geometry, color)
 }
 
-function leafClusterItems(random, tree, count) {
+export function leafClusterItems(random, tree, count) {
   const { center, rx, ry } = tree
   const items = []
   const normal = V()
@@ -529,7 +529,7 @@ function leafClusterItems(random, tree, count) {
   return items
 }
 
-function mangoLeafCluster(random) {
+export function mangoLeafCluster(random) {
   const leaves = []
   for (let index = 0; index < 7; index += 1) {
     const geometry = blade({ length: random.range(0.26, 0.34), width: 0.07, rise: random.range(0.15, 0.65), droop: random.range(0.6, 1.0), segments: 4, fold: 0.3, shape: 'lance', base: '#9a9a9a', tip: '#c9c9c9', rib: '#ffffff' })
@@ -539,17 +539,17 @@ function mangoLeafCluster(random) {
   return merge(leaves)
 }
 
-function litchiLeafCluster(random) {
+export function litchiLeafCluster(random) {
   const parts = []
-  for (let leaf = 0; leaf < 3; leaf += 1) {
-    const azimuth = (leaf / 3) * Math.PI * 2 + random.gauss() * 0.3
+  for (let leaf = 0; leaf < 2; leaf += 1) {
+    const azimuth = leaf * Math.PI + random.gauss() * 0.5
     const out = V(Math.cos(azimuth), 0, Math.sin(azimuth))
-    const end = out.clone().multiplyScalar(0.3).add(V(0, 0.05, 0))
+    const end = out.clone().multiplyScalar(0.38).add(V(0, 0.05, 0))
     parts.push(tube([V(), out.clone().multiplyScalar(0.12).add(V(0, 0.04, 0)), end], 0.003, 0.002, { radial: 3, tubular: 2, color: '#8a8a7a' }))
     for (let pair = 0; pair < 3; pair += 1) {
       const p = V().lerp(end, 0.35 + pair * 0.25)
       for (const sideSign of [-1, 1]) {
-        const geometry = blade({ length: 0.17, width: 0.058, rise: 0.3, droop: 0.55, segments: 3, fold: 0.3, shape: 'lance', base: '#9a9a9a', tip: '#c8c8c8', rib: '#ffffff' })
+        const geometry = blade({ length: 0.22, width: 0.075, rise: 0.3, droop: 0.55, segments: 3, fold: 0.3, shape: 'lance', base: '#9a9a9a', tip: '#c8c8c8', rib: '#ffffff' })
         transform(geometry, { rotation: [0, -azimuth + Math.PI / 2 + sideSign * 1.1, 0] })
         geometry.translate(p.x, p.y, p.z)
         parts.push(geometry)
@@ -587,7 +587,7 @@ function mangoFruit(random) {
   return merge([body, stalk])
 }
 
-function panicle(random, { height = 0.3, radius = 0.09, florets = 26, axis = '#b37b52', floret = '#f3e7b6', floretSize = 0.012 }) {
+export function panicle(random, { height = 0.3, radius = 0.09, florets = 26, axis = '#b37b52', floret = '#f3e7b6', floretSize = 0.012 }) {
   const parts = [tube([V(), V(0, height * 0.5, 0), V(random.gauss() * 0.02, height, 0)], 0.004, 0.0015, { radial: 3, tubular: 3, color: axis })]
   for (let index = 0; index < florets; index += 1) {
     const t = Math.sqrt(random())
@@ -605,7 +605,7 @@ function litchiBunch(random) {
   const parts = []
   const hub = V(0, -0.08, 0)
   parts.push(tube([V(), V(0.01, -0.04, 0), hub], 0.004, 0.003, { radial: 3, tubular: 2, color: '#4c4a2c' }))
-  const fruits = 7
+  const fruits = 6
   for (let index = 0; index < fruits; index += 1) {
     const a = (index / fruits) * Math.PI * 2 + random.gauss() * 0.3
     const p = hub.clone().add(V(Math.cos(a) * random.range(0.03, 0.06), -random.range(0.03, 0.1), Math.sin(a) * random.range(0.03, 0.06)))
@@ -663,7 +663,7 @@ function buildOrchard(ctx, species) {
   core.receiveShadow = true
   ctx.addMesh(core)
 
-  const clustersPerTree = Math.round((mango ? 1500 : 1600) * quality)
+  const clustersPerTree = Math.round((mango ? 1200 : 1050) * quality)
   const leafItems = trees.flatMap((tree) => leafClusterItems(random, tree, clustersPerTree).map((entry) => ({ ...entry, tree })))
   const leafMats = windMaterials(ctx, treeWind, { roughness: 0.48, metalness: 0.02 })
   const leafVariants = [0, 1].map(() => (mango ? mangoLeafCluster(random) : litchiLeafCluster(random)))
@@ -694,7 +694,7 @@ function buildOrchard(ctx, species) {
   }))
 
   // fruit hangs from the lower and outer canopy
-  const fruitItems = leafItems.filter((entry) => (mango ? entry.height < 0.35 && entry.height > -0.75 : entry.height > -0.85) && random() < (mango ? 0.09 : 0.1)).map((entry) => {
+  const fruitItems = leafItems.filter((entry) => (mango ? entry.height < 0.35 && entry.height > -0.75 : entry.height > -0.85) && random() < (mango ? 0.09 : 0.075)).map((entry) => {
     const p = entry.p.clone().addScaledVector(entry.normal, mango ? 0.02 : 0.06)
     const q = new THREE.Quaternion().setFromAxisAngle(UP, random() * Math.PI * 2)
     return { p, q, s: random.range(0.85, 1.12), offset: random.gauss() * 0.05, tone: random.gauss() * 0.06 }

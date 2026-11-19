@@ -147,7 +147,7 @@ export function soilTexture(base, seed, { wet = false } = {}) {
 
 export function buildSoil(plot, kind, disposables) {
   const group = new THREE.Group()
-  if (kind === 'orchard') return { group, update: () => {} }
+  if (kind !== 'furrow' && kind !== 'paddy') return { group, update: () => {} }
   const { width, depth, rowGap = 0.4 } = plot
   const wet = kind === 'paddy'
   const columns = kind === 'furrow' ? Math.min(360, Math.round((width / rowGap) * 6)) : 40

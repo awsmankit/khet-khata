@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pause, Play, RotateCcw, Wind } from 'lucide-react'
-import { cropCatalog, lightModes, stageAt } from './catalog.js'
+import { Pause, Play, RotateCcw, Search, Wind, X } from 'lucide-react'
+import { lightModes } from './catalog.js'
+import { categories, everyCrop, findCrop, stageAtList, stagesFor } from './cropIndex.js'
 import './CropStage.css'
-
-const showcase = { wheat: 0.86, rice: 0.62, maize: 0.66, mustard: 0.58, sugarcane: 0.8, banana: 0.84, mango: 0.86, litchi: 0.86 }
 const SEASON_SECONDS = 14
 
 function detectQuality() {
@@ -24,7 +23,7 @@ function hasWebGL() {
   }
 }
 
-export default function CropStage({ initialLight = 'afternoon', initialCrop = 'wheat', compact = false, onOpenRegister }) {
+export default function CropStage({ initialLight = 'afternoon', initialCrop = 'wheat', requestedCrop = null, compact = false, onOpenRegister, onOpenGuide }) {
   const hostRef = useRef(null)
   const engineRef = useRef(null)
   const playRef = useRef(null)
@@ -36,8 +35,15 @@ export default function CropStage({ initialLight = 'afternoon', initialCrop = 'w
   const [status, setStatus] = useState(() => (hasWebGL() ? 'loading' : 'unsupported'))
   const [hintVisible, setHintVisible] = useState(true)
   const [reducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const crop = cropCatalog.find((entry) => entry.id === cropId) || cropCatalog[0]
-  const stage = stageAt(crop, growth)
+  const [modelInfo, setModelInfo] = useState(null)
+  const [category, setCategory] = useState(() => findCrop(initialCrop)?.category || 'cereal')
+  const [query, setQuery] = useState('')
+  const crop = findCrop(cropId) || everyCrop[0]
+  const stages = stagesFor(crop, modelInfo?.stages)
+  const stage = stageAtList(stages, growth)
+  const shelfCrops = query.trim()
+    ? everyCrop.filter((entry) => `${entry.name} ${entry.local} ${entry.localLatin}`.toLowerCase().includes(query.trim().toLowerCase()))
+    : everyCrop.filter((entry) => entry.category === category)
 
   // create the engine once
   useEffect(() => {
@@ -53,12 +59,16 @@ export default function CropStage({ initialLight = 'afternoon', initialCrop = 'w
       engine.setLight(initialLight)
       setTimeout(() => {
         if (cancelled) return
-        engine.setCrop(initialCrop)
+        const info = engine.modelInfo(initialCrop) || engine.modelInfo('wheat')
+        const first = engine.modelInfo(initialCrop) ? initialCrop : 'wheat'
+        engine.setCrop(first)
         engine.start()
+        setCropId(first)
+        setModelInfo(info)
         setStatus('ready')
         // the one orchestrated moment: the opening field grows from sowing to its showcase stage
-        if (reducedMotion) setGrowth(showcase[initialCrop])
-        else animateGrowth(0.04, showcase[initialCrop], 5200)
+        if (reducedMotion) setGrowth(info.showcase)
+        else animateGrowth(0.04, info.showcase, 5200)
       }, 30)
     }).catch(() => setStatus('unsupported'))
     return () => {
@@ -94,29 +104,39 @@ export default function CropStage({ initialLight = 'afternoon', initialCrop = 'w
   }
 
   function chooseCrop(id) {
-    if (id === cropId || status !== 'ready') return
+    const engine = engineRef.current
+    if (id === cropId || !engine || (status !== 'ready' && status !== 'missing')) return
     cancelAnimationFrame(playRef.current)
     setPlaying(false)
     setCropId(id)
+    const info = engine.modelInfo(id)
+    if (!info) { setModelInfo(null); setStatus('missing'); return }
+    setModelInfo(info)
     setStatus('building')
-    const next = showcase[id]
     // let the "planting" message paint before the heavy build
     requestAnimationFrame(() => setTimeout(() => {
-      engineRef.current?.setCrop(id)
-      setGrowth(next)
-      engineRef.current?.setGrowth(next)
+      engine.setCrop(id)
+      setGrowth(info.showcase)
+      engine.setGrowth(info.showcase)
       setStatus('ready')
     }, 20))
   }
 
+  // opening a crop from the crop guide
+  useEffect(() => {
+    if (!requestedCrop || (status !== 'ready' && status !== 'missing')) return
+    const entry = findCrop(requestedCrop)
+    if (entry) { setCategory(entry.category); setQuery('') }
+    chooseCrop(requestedCrop)
+  }, [requestedCrop, status === 'ready' || status === 'missing']) // eslint-disable-line react-hooks/exhaustive-deps
+
   const windLabel = wind < 15 ? 'Still' : wind < 45 ? 'Light breeze' : wind < 75 ? 'Breezy' : 'Gusty'
-  const groups = [['field', 'Field crops'], ['orchard', 'Orchard and plantation']]
 
   return <section className={`field-stage light-${light} ${compact ? 'is-compact' : ''}`} aria-label="Live 3D crop field">
     <div className="stage-viewport">
       <div ref={hostRef} className="stage-canvas" onPointerDown={() => setHintVisible(false)} />
       <div className="stage-heading">
-        <span className="stage-local" lang="hi" aria-hidden="true">{crop.local}</span>
+        <span className={`stage-local ${crop.local.length > 5 ? 'is-long' : ''} ${crop.local.length > 9 ? 'is-longer' : ''}`} lang="hi" aria-hidden="true">{crop.local}</span>
         <h1 className="stage-name">{crop.name} <span>{crop.localLatin}</span></h1>
         <p className="stage-season">{crop.season}, {crop.window}</p>
       </div>
@@ -125,6 +145,7 @@ export default function CropStage({ initialLight = 'afternoon', initialCrop = 'w
         <strong>{stage.name}</strong>
       </div>
       {status === 'building' && <div className="stage-veil"><span>Planting {crop.name.toLowerCase()}…</span></div>}
+      {status === 'missing' && <div className="stage-veil"><span>The 3D model of {crop.name.toLowerCase()} is still being made. Its details are below.</span></div>}
       {status === 'loading' && <div className="stage-veil is-solid"><span>Preparing the field…</span></div>}
       {status === 'unsupported' && <div className="stage-veil is-solid"><span>This browser cannot show 3D graphics. Crop records and the land map still work.</span></div>}
       {status === 'ready' && hintVisible && <p className="stage-hint">Drag to walk around the field. Pinch or scroll to zoom.</p>}
@@ -138,21 +159,26 @@ export default function CropStage({ initialLight = 'afternoon', initialCrop = 'w
         <div className="season-track">
           <input type="range" min="0" max="1000" value={Math.round(growth * 1000)} onChange={(event) => { cancelAnimationFrame(playRef.current); setPlaying(false); setGrowth(Number(event.target.value) / 1000) }} aria-label={`Season progress for ${crop.name}`} aria-valuetext={`${stage.name}, ${stage.when}`} style={{ '--progress': `${growth * 100}%` }} />
           <ol className="season-ticks" aria-hidden="true">
-            {crop.stages.map(([at, name, when]) => <li key={name} style={{ left: `${at * 100}%` }} className={growth >= at ? 'is-past' : ''}><span>{when}</span></li>)}
+            {stages.map(([at, name, when]) => <li key={`${at}-${name}`} style={{ left: `${at * 100}%` }} className={growth >= at ? 'is-past' : ''}><span>{when}</span></li>)}
           </ol>
         </div>
       </div>
 
-      <div className="shelf" role="group" aria-label="Choose a crop">
-        {groups.map(([group, label]) => <div className="shelf-group" key={group}>
-          <span className="shelf-label">{label}</span>
-          <div className="shelf-items">
-            {cropCatalog.filter((entry) => entry.group === group).map((entry) => <button key={entry.id} className={`crop-chip ${entry.id === cropId ? 'is-active' : ''}`} onClick={() => chooseCrop(entry.id)} aria-pressed={entry.id === cropId}>
-              <span lang="hi">{entry.local}</span>
-              <small>{entry.name}</small>
-            </button>)}
+      <div className="shelf">
+        <div className="shelf-top">
+          <div className="shelf-tabs" role="tablist" aria-label="Crop groups">
+            {categories.map((entry) => <button key={entry.id} role="tab" aria-selected={!query && category === entry.id} className={!query && category === entry.id ? 'is-active' : ''} onClick={() => { setCategory(entry.id); setQuery('') }}>{entry.label}</button>)}
           </div>
-        </div>)}
+          <label className="shelf-search"><Search size={15} /><span className="visually-hidden">Find a crop</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a crop" />{query && <button type="button" onClick={() => setQuery('')} aria-label="Clear search"><X size={14} /></button>}</label>
+        </div>
+        <div className="shelf-items" role="group" aria-label={query ? `Crops matching ${query}` : `${categories.find((entry) => entry.id === category)?.label}`}>
+          {shelfCrops.map((entry) => <button key={entry.id} className={`crop-chip ${entry.id === cropId ? 'is-active' : ''}`} onClick={() => chooseCrop(entry.id)} aria-pressed={entry.id === cropId}>
+            <span lang="hi">{entry.local}</span>
+            <small>{entry.name}</small>
+          </button>)}
+          {!shelfCrops.length && <p className="shelf-empty">No crop called “{query}” yet.</p>}
+        </div>
+        {onOpenGuide && <button className="text-link shelf-guide" onClick={onOpenGuide}>Browse all {everyCrop.length} crops by region and season</button>}
       </div>
 
       <div className="stage-tools">

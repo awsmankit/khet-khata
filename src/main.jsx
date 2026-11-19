@@ -5,7 +5,7 @@ import '@fontsource/mukta/500.css'
 import '@fontsource/mukta/600.css'
 import '@fontsource/mukta/700.css'
 import '@fontsource/yatra-one/400.css'
-import App from './App.jsx'
+import App from './app/App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { Sky } from 'three/addons/objects/Sky.js'
-import { cropBuilders } from './crops.js'
+import { models } from './models/index.js'
 import { createWindUniforms, makeRandom, plantMaterial, applyWind, windDepthMaterial } from './geometry.js'
 import { animateFlock, buildBund, buildFireflies, buildFlock, buildGrass, buildGround, buildHorizon, buildMoon, buildScarecrow, buildSoil, buildStars, egretGeometry, lightSettings, sunDirection } from './scenery.js'
 
@@ -16,6 +16,7 @@ export class FieldEngine {
     this.parts = []
     this.cropUpdaters = []
     this.cropDisposables = []
+    this.cropTickers = []
     this.visible = true
     this.dirty = true
     this.lastTick = performance.now()
@@ -155,6 +156,7 @@ export class FieldEngine {
     this.parts.forEach((part) => part.dispose())
     this.parts = []
     this.cropUpdaters = []
+    this.cropTickers = []
     this.cropGroup.traverse((object) => {
       if (object.isMesh || object.isInstancedMesh) {
         if (object.geometry !== this.egretGeo && object.geometry !== this.scarecrowGeo) object.geometry?.dispose?.()
@@ -165,9 +167,15 @@ export class FieldEngine {
     this.cropDisposables = []
   }
 
+  modelInfo(id) {
+    const model = models[id]
+    return model ? { stages: model.stages, showcase: model.showcase ?? 0.75 } : null
+  }
+
   setCrop(id, { animateCamera = true } = {}) {
-    const builder = cropBuilders[id]
-    if (!builder) return
+    const model = models[id]
+    if (!model) return false
+    const builder = model.build
     this.clearCrop()
     this.cropId = id
     const random = makeRandom(id.split('').reduce((sum, char) => sum * 31 + char.charCodeAt(0), 7))
@@ -210,15 +218,18 @@ export class FieldEngine {
     this.egrets = []
     const config = builder(ctx)
     this.plot = config.plot
+    if (config.update) this.cropUpdaters.push(config.update)
+    if (config.tick) this.cropTickers.push(config.tick)
     const soil = buildSoil(config.plot, config.soil, this.cropDisposables)
     this.cropGroup.add(soil.group)
     this.cropUpdaters.push(soil.update)
     const bund = buildBund(config.plot)
-    this.cropGroup.add(bund.mesh)
-    this.cropDisposables.push(bund.mesh.material)
-    const grass = buildGrass(ctx, config.plot, bund, { orchardTrunks: trunks })
-    this.cropGroup.add(grass)
-    if (config.soil !== 'orchard') {
+    if (config.bund !== false) {
+      this.cropGroup.add(bund.mesh)
+      this.cropDisposables.push(bund.mesh.material)
+    }
+    if (config.grass !== false) this.cropGroup.add(buildGrass(ctx, config.plot, bund, { orchardTrunks: trunks }))
+    if (config.scarecrow ?? (config.soil === 'furrow' || config.soil === 'paddy')) {
       const scarecrowMaterial = applyWind(plantMaterial({ roughness: 0.9 }), this.wind, { strength: 0.02, flutter: 0.004, refHeight: 1.8 })
       const scarecrow = new THREE.Mesh(this.scarecrowGeo, scarecrowMaterial)
       scarecrow.customDepthMaterial = windDepthMaterial(this.wind, { strength: 0.02, flutter: 0.004, refHeight: 1.8 })
@@ -246,6 +257,7 @@ export class FieldEngine {
     this.controls.update()
     this.placeSun()
     this.setGrowth(this.growth)
+    return true
   }
 
   setGrowth(growth) {
@@ -289,6 +301,7 @@ export class FieldEngine {
       this.fireflies.material.uniforms.uTime.value = this.elapsed
       this.fireflies.material.uniforms.uScale.value = this.renderer.getPixelRatio()
       if (this.flock.visible) animateFlock(this.flock, this.elapsed)
+      this.cropTickers?.forEach((tick) => tick(this.elapsed, delta))
       this.egrets?.forEach((egret) => { egret.rotation.y += Math.sin(this.elapsed * 0.3 + egret.userData.bob) * 0.002 })
       if (this.intro) {
         const t = easeOut(Math.min(1, (performance.now() - this.intro.start) / this.intro.duration))
