@@ -2,6 +2,11 @@
 
 All notable changes to Khet Khata are listed here. Versions follow [Semantic Versioning](https://semver.org/): a new major number means saved data or behaviour changes in a way that needs attention, a minor number adds features, and a patch number fixes problems.
 
+## [1.1.2] - 2026-11-19
+
+### Fixed
+- On phones, the land map no longer draws over the top bar while scrolling.
+
 ## [1.1.1] - 2026-11-19
 
 ### Fixed

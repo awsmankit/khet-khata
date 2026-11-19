@@ -1,4 +1,4 @@
-.land-map-shell{position:relative;overflow:hidden;border:1px solid var(--rule-strong);background:#dfe6d2}
+.land-map-shell{position:relative;isolation:isolate;overflow:hidden;border:1px solid var(--rule-strong);background:#dfe6d2}
 .land-leaflet-map{width:100%;height:min(62vh,540px);min-height:340px;background:#e6ecda}
 .land-leaflet-map .leaflet-tile{transition:filter 1s ease}
 .phase-evening .land-leaflet-map .leaflet-tile{filter:sepia(.12) saturate(.92)}
